@@ -1,0 +1,15 @@
+﻿  sample.cpp
+D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(128,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(131,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(134,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(152,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(155,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(158,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(171,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(175,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(179,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(364,14): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(384,14): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\Development\IntExtClassification_GL\glSource\sample.cpp(400,27): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+sample.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
+  Sample.vcxproj -> D:\Development\IntExtClassification_GL\glSource\Debug\Sample.exe
