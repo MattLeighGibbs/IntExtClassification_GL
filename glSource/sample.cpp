@@ -396,7 +396,7 @@ Display( )
 	}
 #endif
 
-	glColor3f(0, 1, 0);
+	glColor4f(0, 1, 0, .1);
 	glScalef(.005, .005, .005);
 	LoadObjFile("Darunia.obj");
 
@@ -657,6 +657,9 @@ InitGraphics( )
 	// MenuStateFunc -- declare when a pop-up menu is in use
 	// TimerFunc -- trigger something to happen a certain time from now
 	// IdleFunc -- what to do when nothing else is going on
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glutSetWindow( MainWindow );
 	glutDisplayFunc( Display );

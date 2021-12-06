@@ -6,6 +6,7 @@
 #include <GL/gl.h>
 
 #include <vector>
+#include <iostream>
 
 
 // delimiters for parsing the obj file:
@@ -36,24 +37,32 @@ struct face
 	int v, n, t;
 };
 
-
+struct usefulFace
+{
+	struct Vertex v;
+	struct Normal n;
+	struct TextureCoord t;
+};
 
 void	Cross( float [3], float [3], float [3] );
 char *	ReadRestOfLine( FILE * );
 void	ReadObjVTN( char *, int *, int *, int * );
 float	Unit( float [3] );
 float	Unit( float [3], float [3] );
+int facenum;
+int usefulFacesNum;
+int ufCount;
 
-
+std::vector <struct Vertex> Vertices(10000);
+std::vector <struct Normal> Normals(10000);
+std::vector <struct TextureCoord> TextureCoords(10000);
+std::vector <std::vector<face>> Faces(10000);
+std::vector <std::vector<usefulFace>> UsefulFaces(10000);
 int
 LoadObjFile( char *name )
 {
 	char *cmd;		// the command string
 	char *str;		// argument string
-
-	std::vector <struct Vertex> Vertices(10000);
-	std::vector <struct Normal> Normals(10000);
-	std::vector <struct TextureCoord> TextureCoords(10000);
 
 	Vertices.clear();
 	Normals.clear();
@@ -62,7 +71,6 @@ LoadObjFile( char *name )
 	struct Vertex sv;
 	struct Normal sn;
 	struct TextureCoord st;
-
 
 	// open the input file:
 
@@ -82,6 +90,7 @@ LoadObjFile( char *name )
 	float zmax = -zmin;
 
 	glBegin( GL_TRIANGLES );
+	int numVertices;
 
 	for( ; ; )
 	{
@@ -198,7 +207,7 @@ LoadObjFile( char *name )
 			int sizen = (int)Normals.size();
 			int sizet = (int)TextureCoords.size();
 
-			int numVertices = 0;
+			numVertices = 0;
 			bool valid = true;
 			int vtx = 0;
 			char *str;
@@ -307,9 +316,30 @@ LoadObjFile( char *name )
 					}
 
 					struct Vertex *vp = &Vertices[ vertices[ vv[vtx] ].v - 1 ];
+
+					if (vp->z < 0)
+					{
+						glColor4f(1, 0, 0, 1);
+					}
+					else
+					{
+						glColor4f(0, 1, 0, .4);
+					}
 					glVertex3f( vp->x, vp->y, vp->z );
 				}
 			}
+			int tempCount = 0;
+			
+			for (face f : vertices)
+			{
+				if (f.n != 0 && f.v != 0 && f.t != 0)
+				{
+					Faces[facenum].push_back(f);
+				}
+			}
+
+			facenum++;
+
 			continue;
 		}
 
@@ -319,6 +349,37 @@ LoadObjFile( char *name )
 			continue;
 		}
 
+	}
+
+	for (std::vector<face> f: Faces)
+	{
+		std::vector<usefulFace> useful;
+
+		for (face f1 : f)
+		{
+			usefulFace uf;
+
+			if (f1.v < Vertices.size())
+			{
+				Vertex v = Vertices[f1.v];
+				uf.v = v;
+				useful.push_back(uf);
+
+			}
+			std::cout << "HERE1\n\n";
+			//TextureCoord t = TextureCoords[f1.t];
+			//std::cout << "HERE2\n\n";
+
+			//Normal n = Normals[f1.n];
+			//std::cout << "HERE3\n\n";
+
+			//uf.t = t;
+		}
+		UsefulFaces[ufCount] = useful;
+		std::cout << "HERE4\n\n";
+
+		ufCount++;
+		std::cout << ufCount << "\n";
 	}
 
 	glEnd();
