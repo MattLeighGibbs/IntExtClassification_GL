@@ -366,7 +366,7 @@ LoadObjFile( char *name )
 				useful.push_back(uf);
 
 			}
-			std::cout << "HERE1\n\n";
+			//std::cout << "HERE1\n\n";
 			//TextureCoord t = TextureCoords[f1.t];
 			//std::cout << "HERE2\n\n";
 
@@ -376,10 +376,10 @@ LoadObjFile( char *name )
 			//uf.t = t;
 		}
 		UsefulFaces[ufCount] = useful;
-		std::cout << "HERE4\n\n";
+		//std::cout << "HERE4\n\n";
 
 		ufCount++;
-		std::cout << ufCount << "\n";
+		//std::cout << ufCount << "\n";
 	}
 
 	glEnd();

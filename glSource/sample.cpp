@@ -169,7 +169,7 @@ const GLfloat FOGEND      = { 4. };
 int		ActiveButton;			// current button that is down
 GLuint	AxesList;				// list to hold the axes
 int		AxesOn;					// != 0 means to draw the axes
-GLuint	BoxList;				// object display list
+GLuint	ObjList;				// object display list
 int		DebugOn;				// != 0 means to print debugging info
 int		DepthCueOn;				// != 0 means to use intensity depth cueing
 int		DepthBufferOn;			// != 0 means to use the z-buffer
@@ -380,6 +380,8 @@ Display( )
 		glCallList( AxesList );
 	}
 
+	glCallList(ObjList);
+
 	// since we are using glScalef( ), be sure normals get unitized:
 
 	glEnable( GL_NORMALIZE );
@@ -396,9 +398,7 @@ Display( )
 	}
 #endif
 
-	glColor4f(0, 1, 0, .1);
-	glScalef(.005, .005, .005);
-	LoadObjFile("Darunia.obj");
+
 
 	// swap the double-buffered framebuffers:
 
@@ -713,45 +713,12 @@ InitLists( )
 
 	// create the object:
 
-	BoxList = glGenLists( 1 );
-	glNewList( BoxList, GL_COMPILE );
+	ObjList = glGenLists( 1 );
+	glNewList( ObjList, GL_COMPILE );
 
-		glBegin( GL_QUADS );
-
-			glColor3f( 0., 0., 1. );
-				glVertex3f( -dx, -dy,  dz );
-				glVertex3f(  dx, -dy,  dz );
-				glVertex3f(  dx,  dy,  dz );
-				glVertex3f( -dx,  dy,  dz );
-
-				glVertex3f( -dx, -dy, -dz );
-				glVertex3f( -dx,  dy, -dz );
-				glVertex3f(  dx,  dy, -dz );
-				glVertex3f(  dx, -dy, -dz );
-
-			glColor3f( 1., 0., 0. );
-				glVertex3f(  dx, -dy,  dz );
-				glVertex3f(  dx, -dy, -dz );
-				glVertex3f(  dx,  dy, -dz );
-				glVertex3f(  dx,  dy,  dz );
-
-				glVertex3f( -dx, -dy,  dz );
-				glVertex3f( -dx,  dy,  dz );
-				glVertex3f( -dx,  dy, -dz );
-				glVertex3f( -dx, -dy, -dz );
-
-			glColor3f( 0., 1., 0. );
-				glVertex3f( -dx,  dy,  dz );
-				glVertex3f(  dx,  dy,  dz );
-				glVertex3f(  dx,  dy, -dz );
-				glVertex3f( -dx,  dy, -dz );
-
-				glVertex3f( -dx, -dy,  dz );
-				glVertex3f( -dx, -dy, -dz );
-				glVertex3f(  dx, -dy, -dz );
-				glVertex3f(  dx, -dy,  dz );
-
-		glEnd( );
+		glColor4f(0, 1, 0, .1);
+		glScalef(.005, .005, .005);
+		LoadObjFile("Darunia.obj");
 
 	glEndList( );
 
