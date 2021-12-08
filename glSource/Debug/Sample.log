@@ -14,6 +14,6 @@ D:\Development\IntExtClassification_GL\glSource\sample.cpp(244,28): warning C424
 D:\Development\IntExtClassification_GL\glSource\sample.cpp(259,56): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
 D:\Development\IntExtClassification_GL\glSource\sample.cpp(260,56): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
 D:\Development\IntExtClassification_GL\glSource\sample.cpp(261,56): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\Development\IntExtClassification_GL\glSource\sample.cpp(824,10): warning C4018: '<': signed/unsigned mismatch
+D:\Development\IntExtClassification_GL\glSource\sample.cpp(821,10): warning C4018: '<': signed/unsigned mismatch
 sample.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
   Sample.vcxproj -> D:\Development\IntExtClassification_GL\glSource\Debug\Sample.exe

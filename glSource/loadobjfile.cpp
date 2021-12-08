@@ -355,7 +355,7 @@ GetFacesFromObjFile( char *name )
 			
 			for (face f : vertices)
 			{
-				if (f.n != 0 && f.v != 0 && f.t != 0)
+				if (f.v != 0)
 				{
 					FaceIndices[facenum].push_back(f);
 				}

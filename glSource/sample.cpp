@@ -236,7 +236,6 @@ struct Eye
 	}
 };
 
-
 std::vector<Eye> EyeVectors;
 
 float GetCenter(float max, float min)
@@ -256,9 +255,9 @@ GenerateEyeVectors()
 	float centerZ = GetCenter(MaxZ, MinZ);
 
 	// get distance modifier for eye position based on axis
-	eyeXDistance = max(abs(MinY - MaxY), abs(MinZ - MaxZ))/3.;
-	eyeYDistance = max(abs(MinX - MaxX), abs(MinZ - MaxZ))/3.;
-	eyeZDistance = max(abs(MinX - MaxX), abs(MinY - MaxY))/3.;
+	eyeXDistance = max(abs(MinY - MaxY), abs(MinZ - MaxZ))/2.5;
+	eyeYDistance = max(abs(MinX - MaxX), abs(MinZ - MaxZ))/2.5;
+	eyeZDistance = max(abs(MinX - MaxX), abs(MinY - MaxY))/2.5;
 
 	// yep they all have the same look at . Look at the center of the model
 	eyeNegX.LookAt = eyePosX.LookAt = eyeNegY.LookAt = eyePosY.LookAt = eyeNegZ.LookAt = eyePosZ.LookAt = glm::vec3(centerX, centerY, centerZ);
@@ -773,7 +772,7 @@ InitLists( )
 	ObjList = glGenLists( 1 );
 	glNewList( ObjList, GL_COMPILE );
 		//glScalef(.005, .005, .005);
-		GetFacesFromObjFile("Darunia.obj");
+		GetFacesFromObjFile("Bomberman.obj");
 	glEndList( );
 
 	// create the axes:
