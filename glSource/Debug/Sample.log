@@ -1,16 +1,19 @@
 ﻿  sample.cpp
-D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(137,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(140,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(143,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(161,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(164,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(167,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(180,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(184,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(188,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(326,28): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(362,13): warning C4018: '<': signed/unsigned mismatch
-D:\Development\IntExtClassification_GL\glSource\sample.cpp(718,23): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-D:\Development\IntExtClassification_GL\glSource\sample.cpp(719,27): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(50,33): warning C4305: 'initializing': truncation from 'int' to 'float'
+D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(168,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(171,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(174,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(192,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(195,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(198,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(211,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(215,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(219,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(382,13): warning C4018: '<': signed/unsigned mismatch
+D:\Development\IntExtClassification_GL\glSource\sample.cpp(244,28): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+D:\Development\IntExtClassification_GL\glSource\sample.cpp(259,56): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\Development\IntExtClassification_GL\glSource\sample.cpp(260,56): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\Development\IntExtClassification_GL\glSource\sample.cpp(261,56): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+D:\Development\IntExtClassification_GL\glSource\sample.cpp(824,10): warning C4018: '<': signed/unsigned mismatch
 sample.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
   Sample.vcxproj -> D:\Development\IntExtClassification_GL\glSource\Debug\Sample.exe

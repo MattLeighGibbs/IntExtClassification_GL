@@ -10,6 +10,8 @@
 #pragma warning(disable:4996)
 #endif
 
+#define OBJ_PATH "Darunia.obj"
+
 #include "glew.h"
 #include <GL/gl.h>
 #include <GL/glu.h>
@@ -17,6 +19,7 @@
 
 #include "loadobjfile.cpp"
 
+#include "glm/vec3.hpp"
 
 //	This is a sample OpenGL / GLUT program
 //
@@ -63,7 +66,7 @@ const float BOXSIZE = { 2.f };
 
 const float ANGFACT = { 1. };
 const float SCLFACT = { 0.005f };
-
+int currentEye;
 // minimum allowable scale factor:
 
 const float MINSCALE = { 0.05f };
@@ -82,6 +85,8 @@ const float SCROLL_WHEEL_CLICK_FACTOR = { 5. };
 const int LEFT   = { 4 };
 const int MIDDLE = { 2 };
 const int RIGHT  = { 1 };
+
+float EyeDistance;
 
 // which projection:
 
@@ -219,12 +224,69 @@ void			Cross(float[3], float[3], float[3]);
 float			Dot(float [3], float [3]);
 float			Unit(float [3], float [3]);
 
+char* ObjPath;
+
+struct Eye
+{
+	glm::vec3 LookAt, Position;
+
+	void DoLook()
+	{
+		gluLookAt(Position.x, Position.y, Position.z, LookAt.x, LookAt.y, LookAt.z, 0, 1, 0);
+	}
+};
+
+
+std::vector<Eye> EyeVectors;
+
+float GetCenter(float max, float min)
+{
+	return (float)(max + min) / 2.;
+}
+
+void 
+GenerateEyeVectors()
+{
+	Eye eyeNegX, eyePosX, eyeNegY, eyePosY, eyeNegZ, eyePosZ;
+	float eyeXDistance, eyeYDistance, eyeZDistance;
+
+	// Get centers to generate LOOKAT direction 
+	float centerX = GetCenter(MaxX, MinX);
+	float centerY = GetCenter(MaxY, MinY);
+	float centerZ = GetCenter(MaxZ, MinZ);
+
+	// get distance modifier for eye position based on axis
+	eyeXDistance = max(abs(MinY - MaxY), abs(MinZ - MaxZ))/3.;
+	eyeYDistance = max(abs(MinX - MaxX), abs(MinZ - MaxZ))/3.;
+	eyeZDistance = max(abs(MinX - MaxX), abs(MinY - MaxY))/3.;
+
+	// yep they all have the same look at . Look at the center of the model
+	eyeNegX.LookAt = eyePosX.LookAt = eyeNegY.LookAt = eyePosY.LookAt = eyeNegZ.LookAt = eyePosZ.LookAt = glm::vec3(centerX, centerY, centerZ);
+
+	eyeNegX.Position = glm::vec3(MinX - eyeXDistance, 0, 0);
+	eyePosX.Position = glm::vec3(MaxX + eyeXDistance, 0, 0);
+	eyeNegY.Position = glm::vec3(0, MinY - eyeYDistance, 0);
+	eyePosY.Position = glm::vec3(0, MaxY + eyeYDistance, 0);
+	eyeNegZ.Position = glm::vec3(0, 0, MinZ - eyeZDistance);
+	eyePosZ.Position = glm::vec3(0, 0, MaxZ + eyeZDistance);
+
+	EyeVectors.push_back(eyeNegX);
+	EyeVectors.push_back(eyePosX);
+	EyeVectors.push_back(eyeNegY);
+	EyeVectors.push_back(eyePosY);
+	EyeVectors.push_back(eyeNegZ);
+	EyeVectors.push_back(eyePosZ);
+}
 
 // main program:
 
 int
 main( int argc, char *argv[ ] )
 {
+	currentEye = 0;
+	GetFacesFromObjFile("Darunia.obj");
+	GenerateEyeVectors();
+
 	// turn on the glut package:
 	// (do this before checking argc and argv since it might
 	// pull some command line arguments out)
@@ -284,7 +346,6 @@ Animate( )
 	glutPostRedisplay( );
 }
 
-
 // draw the complete scene:
 
 void
@@ -342,7 +403,7 @@ Display( )
 
 	// set the eye position, look-at position, and up-vector:
 
-	gluLookAt( 0., 0., 3.,     0., 0., 0.,     0., 1., 0. );
+	EyeVectors[currentEye].DoLook();
 
 	// rotate the scene:
 
@@ -603,6 +664,7 @@ InitMenus( )
 	glutAddSubMenu(   "Debug",         debugmenu);
 	glutAddMenuEntry( "Quit",          QUIT );
 
+
 // attach the pop-up menu to the right mouse button:
 
 	glutAttachMenu( GLUT_RIGHT_BUTTON );
@@ -704,20 +766,14 @@ InitGraphics( )
 void
 InitLists( )
 {
-	float dx = BOXSIZE / 2.f;
-	float dy = BOXSIZE / 2.f;
-	float dz = BOXSIZE / 2.f;
 	glutSetWindow( MainWindow );
 
 	// create the object:
 
 	ObjList = glGenLists( 1 );
 	glNewList( ObjList, GL_COMPILE );
-
-
-	glColor4f(0, 1, 0, .1);
-	glScalef(.005, .005, .005);
-	LoadObjFile("Darunia.obj");
+		//glScalef(.005, .005, .005);
+		GetFacesFromObjFile("Darunia.obj");
 	glEndList( );
 
 	// create the axes:
@@ -760,7 +816,12 @@ Keyboard( unsigned char c, int x, int y )
 		default:
 			fprintf( stderr, "Don't know what to do with keyboard hit: '%c' (0x%0x)\n", c, c );
 	}
+	int ind = c - '0';
 
+	if (ind < EyeVectors.size())
+	{
+		currentEye = ind;
+	}
 	// force a call to Display( ):
 
 	glutSetWindow( MainWindow );

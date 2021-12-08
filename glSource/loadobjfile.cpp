@@ -37,11 +37,9 @@ struct face
 	int v, n, t;
 };
 
-struct usefulFace
+struct Poly
 {
-	struct Vertex v;
-	struct Normal n;
-	struct TextureCoord t;
+	std::vector<Vertex> vList{};
 };
 
 void	Cross( float [3], float [3], float [3] );
@@ -49,6 +47,9 @@ char *	ReadRestOfLine( FILE * );
 void	ReadObjVTN( char *, int *, int *, int * );
 float	Unit( float [3] );
 float	Unit( float [3], float [3] );
+float	MinX, MinY, MinZ = INT_MAX;
+float	MaxX, MaxY, MaxZ = INT_MIN;
+
 int facenum;
 int usefulFacesNum;
 int ufCount;
@@ -56,11 +57,41 @@ int ufCount;
 std::vector <struct Vertex> Vertices(10000);
 std::vector <struct Normal> Normals(10000);
 std::vector <struct TextureCoord> TextureCoords(10000);
-std::vector <std::vector<face>> Faces(10000);
-std::vector <std::vector<usefulFace>> UsefulFaces(10000);
-int
-LoadObjFile( char *name )
+std::vector<std::vector<face>> FaceIndices(10000);
+
+void doMinMaxChecks(const Vertex& v)
 {
+	if (v.x > MaxX)
+	{
+		MaxX = v.x;
+	}
+	if (v.x < MinX)
+	{
+		MinX = v.x;
+	}
+	if (v.y > MaxY)
+	{
+		MaxY = v.y;
+	}
+	if (v.y < MinY)
+	{
+		MinY = v.y;
+	}
+	if (v.z > MaxZ)
+	{
+		MaxZ = v.z;
+	}
+	if (v.z < MinZ)
+	{
+		MinZ = v.z;
+	}
+}
+
+std::vector <Poly> 
+GetFacesFromObjFile( char *name )
+{
+	std::vector <Poly> faces;
+
 	char *cmd;		// the command string
 	char *str;		// argument string
 
@@ -78,7 +109,7 @@ LoadObjFile( char *name )
 	if( fp == NULL )
 	{
 		fprintf( stderr, "Cannot open .obj file '%s'\n", name );
-		return 1;
+		return faces;
 	}
 
 
@@ -317,14 +348,6 @@ LoadObjFile( char *name )
 
 					struct Vertex *vp = &Vertices[ vertices[ vv[vtx] ].v - 1 ];
 
-					if (vp->z < 0)
-					{
-						glColor4f(1, 0, 0, 1);
-					}
-					else
-					{
-						glColor4f(0, 1, 0, .4);
-					}
 					glVertex3f( vp->x, vp->y, vp->z );
 				}
 			}
@@ -334,7 +357,7 @@ LoadObjFile( char *name )
 			{
 				if (f.n != 0 && f.v != 0 && f.t != 0)
 				{
-					Faces[facenum].push_back(f);
+					FaceIndices[facenum].push_back(f);
 				}
 			}
 
@@ -351,36 +374,25 @@ LoadObjFile( char *name )
 
 	}
 
-	for (std::vector<face> f: Faces)
+	for (std::vector<face> f: FaceIndices)
 	{
-		std::vector<usefulFace> useful;
-
-		for (face f1 : f)
+		Poly tempPoly; 
+		for (const face& f1 : f)
 		{
-			usefulFace uf;
-
 			if (f1.v < Vertices.size())
 			{
 				Vertex v = Vertices[f1.v];
-				uf.v = v;
-				useful.push_back(uf);
-
+				doMinMaxChecks(v);
+				tempPoly.vList.push_back(v);
 			}
-			//std::cout << "HERE1\n\n";
-			//TextureCoord t = TextureCoords[f1.t];
-			//std::cout << "HERE2\n\n";
-
-			//Normal n = Normals[f1.n];
-			//std::cout << "HERE3\n\n";
-
-			//uf.t = t;
 		}
-		UsefulFaces[ufCount] = useful;
-		//std::cout << "HERE4\n\n";
-
-		ufCount++;
-		//std::cout << ufCount << "\n";
+		if (tempPoly.vList.size() > 0)
+		{
+			faces.push_back(tempPoly);
+		}
 	}
+
+	//std::cout << "FACE COUNT: " << ufCount;
 
 	glEnd();
 	fclose( fp );
@@ -392,7 +404,7 @@ LoadObjFile( char *name )
 	fprintf( stderr, "Obj file  span = (%8.3f,%8.3f,%8.3f)\n",
 		xmax-xmin, ymax-ymin, zmax-zmin );
 
-	return 0;
+	return faces;
 }
 
 
@@ -524,3 +536,5 @@ ReadObjVTN( char *str, int *v, int *t, int *n )
 		}
 	}
 }
+
+
