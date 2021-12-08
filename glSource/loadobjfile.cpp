@@ -404,6 +404,9 @@ GetFacesFromObjFile( char *name )
 	fprintf( stderr, "Obj file  span = (%8.3f,%8.3f,%8.3f)\n",
 		xmax-xmin, ymax-ymin, zmax-zmin );
 
+
+	
+
 	return faces;
 }
 

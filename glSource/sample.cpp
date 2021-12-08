@@ -277,13 +277,98 @@ GenerateEyeVectors()
 	EyeVectors.push_back(eyePosZ);
 }
 
+
+
+void
+GetCurrentDepthBuffer()
+{
+	GLuint pbo = 0;
+	int w = glutGet(GLUT_WINDOW_WIDTH);
+	int h = glutGet(GLUT_WINDOW_HEIGHT);
+	printf("(W, H): %d, %d\n", w, h);
+	glGenBuffers(1, &pbo);
+	glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
+	glBufferData(GL_PIXEL_PACK_BUFFER, w * h * sizeof(GLfloat), 0, GL_STREAM_READ);
+	glReadPixels(0, 0, w, h, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	GLfloat* ptr = (GLfloat*)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
+	if (ptr)
+	{
+		printf("YES");
+		char file_name[20] = "buffer_out_", f_id[3];
+		itoa(currentEye, f_id, 10);
+		strcat(file_name, f_id);
+		strcat(file_name, ".txt");
+		printf(file_name);
+
+		FILE* tfp = fopen(file_name, "w+");
+		fprintf(tfp, "\n");
+		for (int i = 0; i < w; i++)
+		{
+			for (int j = 0; j < h; j++)
+				if (*(ptr + i * h + j) < 1 - 1e-8)
+					fprintf(tfp, "(%d, %d): %.4lf\n", i, j, *(ptr + i * h + j));
+			//fprintf(tfp, "%.2lf ", *(ptr + i*h + j));
+	//fprintf(tfp, "\n");
+		}
+		fprintf(tfp, "\n");
+	}
+	glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+	glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+}
+
+void
+RunClassification(std::vector<Poly> Faces)
+{
+	
+
+	for (int eye = 0; eye < 6; eye++)
+	{
+		glDrawBuffer(GL_BACK);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glEnable(GL_DEPTH_TEST);
+
+		currentEye = eye;
+		EyeVectors[eye].DoLook();
+
+		glBegin(GL_TRIANGLES);
+		printf("[Number of Faces]: %d\n", Faces.size());
+		for (Poly tmpPoly : Faces)
+		{
+			int numVertices = tmpPoly.vList.size();
+			int numTriangles = numVertices - 2;
+
+			for (int it = 0; it < numTriangles; it++)
+			{
+				int v_id[3];
+				v_id[0] = 0;
+				v_id[1] = it + 1;
+				v_id[2] = it + 2;
+				for (int i = 0; i < 3; i++)
+				{
+					struct Vertex tmpV = tmpPoly.vList[v_id[i]];
+					glTexCoord2f(1, 1);
+					glVertex3f(tmpV.x, tmpV.y, tmpV.z);
+					//printf("(%.2lf, %.2lf, %.2lf)", tmpV.x, tmpV.y, tmpV.z);
+				}
+
+			}
+		}
+		glEnd();
+
+		GetCurrentDepthBuffer();
+	}
+}
+
 // main program:
+
+std::vector <Poly> InputFaces;
 
 int
 main( int argc, char *argv[ ] )
 {
 	currentEye = 0;
-	GetFacesFromObjFile("Darunia.obj");
+	InputFaces = GetFacesFromObjFile("Darunia.obj");
 	GenerateEyeVectors();
 
 	// turn on the glut package:
@@ -292,6 +377,7 @@ main( int argc, char *argv[ ] )
 
 	glutInit( &argc, argv );
 
+
 	// setup all the graphics stuff:
 
 	InitGraphics( );
@@ -299,6 +385,7 @@ main( int argc, char *argv[ ] )
 	// init all the global variables used by Display( ):
 
 	Reset( );
+
 
 	// create the display structures that will not change:
 
@@ -312,6 +399,7 @@ main( int argc, char *argv[ ] )
 	// (this will never return)
 
 	glutSetWindow( MainWindow );
+
 	glutMainLoop( );
 
 	// glutMainLoop( ) never returns
@@ -347,6 +435,8 @@ Animate( )
 
 // draw the complete scene:
 
+bool FIRST_RUN_FLAG = true;
+
 void
 Display( )
 {
@@ -358,6 +448,8 @@ Display( )
 	// set which window we want to do the graphics into:
 
 	glutSetWindow( MainWindow );
+
+	
 
 	// erase the background:
 
@@ -402,7 +494,7 @@ Display( )
 
 	// set the eye position, look-at position, and up-vector:
 
-	EyeVectors[currentEye].DoLook();
+	//EyeVectors[currentEye].DoLook();
 
 	// rotate the scene:
 
@@ -455,9 +547,112 @@ Display( )
 		glPopMatrix( );
 	}
 #endif
-	
-	glCallList(ObjList);
 
+	//EyeVectors[2].DoLook();
+	//glCallList(ObjList);
+
+	//RunClassification(InputFaces);
+
+	if (FIRST_RUN_FLAG)
+		;
+	else
+	{
+		EyeVectors[currentEye].DoLook();
+		//glCallList(ObjList);
+
+		glBegin(GL_TRIANGLES);
+		printf("[Number of Faces]: %d\n", InputFaces.size());
+		for (int face_id = 0; face_id < InputFaces.size(); face_id ++)
+		{
+			Poly tmpPoly = InputFaces[face_id];
+			int numVertices = tmpPoly.vList.size();
+			int numTriangles = numVertices - 2;
+
+			for (int it = 0; it < numTriangles; it++)
+			{
+				int v_id[3];
+				v_id[0] = 0;
+				v_id[1] = it + 1;
+				v_id[2] = it + 2;
+				for (int i = 0; i < 1; i++)
+				{
+					struct Vertex tmpV = tmpPoly.vList[v_id[i]];
+					//glTexCoord2f(1, 1);
+					glVertex3f(tmpV.x, tmpV.y, tmpV.z);
+					//printf("(%.2lf, %.2lf, %.2lf)", tmpV.x, tmpV.y, tmpV.z);
+				}
+
+			}
+		}
+		glEnd();
+
+		/*
+		GLuint pbo = 0;
+		int w = glutGet(GLUT_WINDOW_WIDTH);
+		int h = glutGet(GLUT_WINDOW_HEIGHT);
+		printf("(W, H): %d, %d\n", w, h);
+		glGenBuffers(1, &pbo);
+		glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
+		glBufferData(GL_PIXEL_PACK_BUFFER, w * h * sizeof(GLfloat), 0, GL_STREAM_READ);
+		glReadPixels(0, 0, w, h, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+		GLfloat* ptr = (GLfloat*)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
+		if (ptr)
+		{
+			char file_name[30] = "buffer_out_load_", f_id[3];
+			itoa(currentEye, f_id, 10);
+			strcat(file_name, f_id);
+			strcat(file_name, ".txt");
+			printf(file_name);
+
+			FILE* tfp = fopen(file_name, "w+");
+			fprintf(tfp, "\n");
+			for (int i = 0; i < w; i++)
+			{
+				for (int j = 0; j < h; j++)
+					if (*(ptr + i * h + j) < 1 - 1e-6)
+						fprintf(tfp, "(%d, %d): %.4lf\n", i, j, *(ptr + i * h + j));
+				//fprintf(tfp, "%.2lf ", *(ptr + i*h + j));
+		//fprintf(tfp, "\n");
+			}
+			fprintf(tfp, "\n");
+			fclose(tfp);
+		}
+		glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+		glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+		*/
+	}
+	FIRST_RUN_FLAG = false;
+
+	/*
+	GLuint pbo = 0;
+	int w = glutGet(GLUT_WINDOW_WIDTH);
+	int h = glutGet(GLUT_WINDOW_HEIGHT);
+	printf("(W, H): %d, %d\n", w, h);
+	glGenBuffers(1, &pbo);
+	glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
+	glBufferData(GL_PIXEL_PACK_BUFFER, w* h * sizeof(GLfloat), 0, GL_STREAM_READ);
+	glReadPixels(0, 0, w, h, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	GLfloat* ptr = (GLfloat*)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
+	if (ptr)
+	{
+		FILE* tfp = fopen("buffer_out_load.txt", "w+");
+		fprintf(tfp, "\n");
+		for (int i = 0; i < w; i++)
+		{
+			for (int j = 0; j < h; j++)
+				if (*(ptr + i * h + j) < 1 - 1e-6)
+					fprintf(tfp, "(%d, %d): %.4lf\n", i, j, *(ptr + i * h + j));
+			//fprintf(tfp, "%.2lf ", *(ptr + i*h + j));
+	//fprintf(tfp, "\n");
+		}
+		fprintf(tfp, "\n");
+		fclose(tfp);
+	}
+	glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+	glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+
+	exit(0);
+	*/
 	// swap the double-buffered framebuffers:
 
 	glutSwapBuffers( );
@@ -772,7 +967,7 @@ InitLists( )
 	ObjList = glGenLists( 1 );
 	glNewList( ObjList, GL_COMPILE );
 		//glScalef(.005, .005, .005);
-		GetFacesFromObjFile("Bomberman.obj");
+		GetFacesFromObjFile(OBJ_PATH);
 	glEndList( );
 
 	// create the axes:
