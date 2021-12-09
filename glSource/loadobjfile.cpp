@@ -40,6 +40,7 @@ struct face
 struct Poly
 {
 	std::vector<Vertex> vList{};
+	int cnt = 0;
 };
 
 void	Cross( float [3], float [3], float [3] );

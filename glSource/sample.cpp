@@ -255,9 +255,9 @@ GenerateEyeVectors()
 	float centerZ = GetCenter(MaxZ, MinZ);
 
 	// get distance modifier for eye position based on axis
-	eyeXDistance = max(abs(MinY - MaxY), abs(MinZ - MaxZ))/2.5;
-	eyeYDistance = max(abs(MinX - MaxX), abs(MinZ - MaxZ))/2.5;
-	eyeZDistance = max(abs(MinX - MaxX), abs(MinY - MaxY))/2.5;
+	eyeXDistance = max(abs(MinY - MaxY), abs(MinZ - MaxZ))/10;
+	eyeYDistance = max(abs(MinX - MaxX), abs(MinZ - MaxZ))/10;
+	eyeZDistance = max(abs(MinX - MaxX), abs(MinY - MaxY))/10;
 
 	// yep they all have the same look at . Look at the center of the model
 	eyeNegX.LookAt = eyePosX.LookAt = eyeNegY.LookAt = eyePosY.LookAt = eyeNegZ.LookAt = eyePosZ.LookAt = glm::vec3(centerX, centerY, centerZ);
@@ -278,23 +278,63 @@ GenerateEyeVectors()
 }
 
 
+GLfloat DepthBuffer[1024][1024];
+GLfloat FaceBuffer[1024][1024];
 
-void
-GetCurrentDepthBuffer()
+
+void set_DepthBuffer(GLfloat* ptr, int W, int H)
+{
+
+	//printf("[DepthBuffer] (W, H): %d, %d\n", W, H);
+	for (int i = 0; i < W; i++)
+		for (int j = 0; j < H; j++)
+			DepthBuffer[i][j] = *(ptr + i * H + j);
+}
+
+void set_FaceBuffer(GLfloat* ptr, int W, int H)
+{
+
+	//printf("[FaceBuffer] (W, H): %d, %d\n", W, H);
+	for (int i = 0; i < W; i++)
+		for (int j = 0; j < H; j++)
+			FaceBuffer[i][j] = *(ptr + i * H + j);
+}
+
+bool buffer_cmp(int W, int H)
+{
+	GLfloat eps = 1e-8;
+	for (int i = 0; i < W; i++)
+	{
+		for (int j = 0; j < H; j++)
+			if (abs(FaceBuffer[i][j] - 1) > eps)
+				if (abs(DepthBuffer[i][j] - FaceBuffer[i][j]) > eps)
+					return false;
+	}
+	return true;
+}
+
+void 
+GetCurrentDepthBuffer(bool set_depth_buffer)
 {
 	GLuint pbo = 0;
 	int w = glutGet(GLUT_WINDOW_WIDTH);
 	int h = glutGet(GLUT_WINDOW_HEIGHT);
-	printf("(W, H): %d, %d\n", w, h);
+	//printf("(W, H): %d, %d\n", w, h);
 	glGenBuffers(1, &pbo);
 	glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
 	glBufferData(GL_PIXEL_PACK_BUFFER, w * h * sizeof(GLfloat), 0, GL_STREAM_READ);
 	glReadPixels(0, 0, w, h, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 	GLfloat* ptr = (GLfloat*)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
+	
+
 	if (ptr)
 	{
-		printf("YES");
-		char file_name[20] = "buffer_out_", f_id[3];
+		if (set_depth_buffer)
+			set_DepthBuffer(ptr, w, h);
+		else
+			set_FaceBuffer(ptr, w, h);
+		
+		char file_name[30] = "buffer_out_", f_id[3];
 		itoa(currentEye, f_id, 10);
 		strcat(file_name, f_id);
 		strcat(file_name, ".txt");
@@ -305,28 +345,139 @@ GetCurrentDepthBuffer()
 		for (int i = 0; i < w; i++)
 		{
 			for (int j = 0; j < h; j++)
-				if (*(ptr + i * h + j) < 1 - 1e-8)
+				if (*(ptr + i * h + j) < 1 - 1e-6)
 					fprintf(tfp, "(%d, %d): %.4lf\n", i, j, *(ptr + i * h + j));
 			//fprintf(tfp, "%.2lf ", *(ptr + i*h + j));
 	//fprintf(tfp, "\n");
 		}
 		fprintf(tfp, "\n");
+		fclose(tfp);
+		
 	}
 	glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
-	glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+
+	//return ptr;
 }
+
+void
+InitBuffer()
+{
+	// set which window we want to do the graphics into:
+
+	glutSetWindow(MainWindow);
+
+
+
+	// erase the background:
+
+	glDrawBuffer(GL_BACK);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glEnable(GL_DEPTH_TEST);
+#ifdef DEMO_DEPTH_BUFFER
+	if (DepthBufferOn == 0)
+		glDisable(GL_DEPTH_TEST);
+#endif
+
+	// specify shading to be flat:
+
+	glShadeModel(GL_FLAT);
+
+	// set the viewport to a square centered in the window:
+
+	GLsizei vx = glutGet(GLUT_WINDOW_WIDTH);
+	GLsizei vy = glutGet(GLUT_WINDOW_HEIGHT);
+	GLsizei v = vx < vy ? vx : vy;			// minimum dimension
+	GLint xl = (vx - v) / 2;
+	GLint yb = (vy - v) / 2;
+	glViewport(xl, yb, v, v);
+
+	// set the viewing volume:
+	// remember that the Z clipping  values are actually
+	// given as DISTANCES IN FRONT OF THE EYE
+	// USE gluOrtho2D( ) IF YOU ARE DOING 2D !
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	if (WhichProjection == ORTHO)
+		glOrtho(-3., 3., -3., 3., 0.1, 1000.);
+	else
+		gluPerspective(90., 1., 0.1, 1000.);
+
+	// place the objects into the scene:
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	// set the eye position, look-at position, and up-vector:
+
+	//EyeVectors[currentEye].DoLook();
+
+	// rotate the scene:
+
+	glRotatef((GLfloat)Yrot, 0., 1., 0.);
+	glRotatef((GLfloat)Xrot, 1., 0., 0.);
+
+	// uniformly scale the scene:
+
+	if (Scale < MINSCALE)
+		Scale = MINSCALE;
+	glScalef((GLfloat)Scale, (GLfloat)Scale, (GLfloat)Scale);
+
+	// set the fog parameters:
+	// (this is really here to do intensity depth cueing)
+
+	if (DepthCueOn != 0)
+	{
+		glFogi(GL_FOG_MODE, FOGMODE);
+		glFogfv(GL_FOG_COLOR, FOGCOLOR);
+		glFogf(GL_FOG_DENSITY, FOGDENSITY);
+		glFogf(GL_FOG_START, FOGSTART);
+		glFogf(GL_FOG_END, FOGEND);
+		glEnable(GL_FOG);
+	}
+	else
+	{
+		glDisable(GL_FOG);
+	}
+
+	// possibly draw the axes:
+
+	if (AxesOn != 0)
+	{
+		glColor3fv(&Colors[WhichColor][0]);
+		glCallList(AxesList);
+	}
+
+	// since we are using glScalef( ), be sure normals get unitized:
+
+	glEnable(GL_NORMALIZE);
+
+	// draw the current object:
+
+#ifdef DEMO_Z_FIGHTING
+	if (DepthFightingOn != 0)
+	{
+		glPushMatrix();
+		glRotatef(90., 0., 1., 0.);
+		glCallList(BoxList);
+		glPopMatrix();
+}
+#endif
+}
+
+
 
 void
 RunClassification(std::vector<Poly> Faces)
 {
-	
 
+	int W = glutGet(GLUT_WINDOW_WIDTH);
+	int H = glutGet(GLUT_WINDOW_HEIGHT);
+	
 	for (int eye = 0; eye < 6; eye++)
 	{
-		glDrawBuffer(GL_BACK);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		glEnable(GL_DEPTH_TEST);
+		InitBuffer();
 
 		currentEye = eye;
 		EyeVectors[eye].DoLook();
@@ -347,7 +498,7 @@ RunClassification(std::vector<Poly> Faces)
 				for (int i = 0; i < 3; i++)
 				{
 					struct Vertex tmpV = tmpPoly.vList[v_id[i]];
-					glTexCoord2f(1, 1);
+					//glTexCoord2f(1, 1);
 					glVertex3f(tmpV.x, tmpV.y, tmpV.z);
 					//printf("(%.2lf, %.2lf, %.2lf)", tmpV.x, tmpV.y, tmpV.z);
 				}
@@ -356,7 +507,45 @@ RunClassification(std::vector<Poly> Faces)
 		}
 		glEnd();
 
-		GetCurrentDepthBuffer();
+		GetCurrentDepthBuffer(true);
+		continue;
+		int total = 0, cc=0;
+		
+		for (Poly tmpPoly : Faces)
+		{
+			InitBuffer();
+			glBegin(GL_TRIANGLES);
+			int numVertices = tmpPoly.vList.size();
+			int numTriangles = numVertices - 2;
+
+			if (numTriangles < 1)
+				continue;
+
+			for (int it = 0; it < numTriangles; it++)
+			{
+				int v_id[3];
+				v_id[0] = 0;
+				v_id[1] = it + 1;
+				v_id[2] = it + 2;
+				for (int i = 0; i < 3; i++)
+				{
+					struct Vertex tmpV = tmpPoly.vList[v_id[i]];
+					//glTexCoord2f(1, 1);
+					glVertex3f(tmpV.x, tmpV.y, tmpV.z);
+					//printf("(%.2lf, %.2lf, %.2lf)", tmpV.x, tmpV.y, tmpV.z);
+				}
+
+			}
+			glEnd();
+
+			GetCurrentDepthBuffer(false);
+			if (buffer_cmp(W, H))
+			{
+				tmpPoly.cnt += 1;
+				total += 1;
+			}
+		}
+		printf("[Total cnt]: %d\n", total);
 	}
 }
 
@@ -437,6 +626,8 @@ Animate( )
 
 bool FIRST_RUN_FLAG = true;
 
+
+
 void
 Display( )
 {
@@ -445,108 +636,7 @@ Display( )
 		fprintf( stderr, "Display\n" );
 	}
 
-	// set which window we want to do the graphics into:
-
-	glutSetWindow( MainWindow );
-
-	
-
-	// erase the background:
-
-	glDrawBuffer( GL_BACK );
-	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
-	glEnable( GL_DEPTH_TEST );
-#ifdef DEMO_DEPTH_BUFFER
-	if( DepthBufferOn == 0 )
-		glDisable( GL_DEPTH_TEST );
-#endif
-
-	// specify shading to be flat:
-
-	glShadeModel( GL_FLAT );
-
-	// set the viewport to a square centered in the window:
-
-	GLsizei vx = glutGet( GLUT_WINDOW_WIDTH );
-	GLsizei vy = glutGet( GLUT_WINDOW_HEIGHT );
-	GLsizei v = vx < vy ? vx : vy;			// minimum dimension
-	GLint xl = ( vx - v ) / 2;
-	GLint yb = ( vy - v ) / 2;
-	glViewport( xl, yb,  v, v );
-
-	// set the viewing volume:
-	// remember that the Z clipping  values are actually
-	// given as DISTANCES IN FRONT OF THE EYE
-	// USE gluOrtho2D( ) IF YOU ARE DOING 2D !
-
-	glMatrixMode( GL_PROJECTION );
-	glLoadIdentity( );
-	if( WhichProjection == ORTHO )
-		glOrtho( -3., 3.,     -3., 3.,     0.1, 1000. );
-	else
-		gluPerspective( 90., 1.,	0.1, 1000. );
-
-	// place the objects into the scene:
-
-	glMatrixMode( GL_MODELVIEW );
-	glLoadIdentity( );
-
-	// set the eye position, look-at position, and up-vector:
-
-	//EyeVectors[currentEye].DoLook();
-
-	// rotate the scene:
-
-	glRotatef( (GLfloat)Yrot, 0., 1., 0. );
-	glRotatef( (GLfloat)Xrot, 1., 0., 0. );
-
-	// uniformly scale the scene:
-
-	if( Scale < MINSCALE )
-		Scale = MINSCALE;
-	glScalef( (GLfloat)Scale, (GLfloat)Scale, (GLfloat)Scale );
-
-	// set the fog parameters:
-	// (this is really here to do intensity depth cueing)
-
-	if( DepthCueOn != 0 )
-	{
-		glFogi( GL_FOG_MODE, FOGMODE );
-		glFogfv( GL_FOG_COLOR, FOGCOLOR );
-		glFogf( GL_FOG_DENSITY, FOGDENSITY );
-		glFogf( GL_FOG_START, FOGSTART );
-		glFogf( GL_FOG_END, FOGEND );
-		glEnable( GL_FOG );
-	}
-	else
-	{
-		glDisable( GL_FOG );
-	}
-
-	// possibly draw the axes:
-
-	if( AxesOn != 0 )
-	{
-		glColor3fv( &Colors[WhichColor][0] );
-		glCallList( AxesList );
-	}
-
-	// since we are using glScalef( ), be sure normals get unitized:
-
-	glEnable( GL_NORMALIZE );
-
-	// draw the current object:
-
-#ifdef DEMO_Z_FIGHTING
-	if( DepthFightingOn != 0 )
-	{
-		glPushMatrix( );
-			glRotatef( 90.,   0., 1., 0. );
-			glCallList( BoxList );
-		glPopMatrix( );
-	}
-#endif
+	InitBuffer();
 
 	//EyeVectors[2].DoLook();
 	//glCallList(ObjList);
@@ -554,7 +644,10 @@ Display( )
 	//RunClassification(InputFaces);
 
 	if (FIRST_RUN_FLAG)
-		;
+	{
+		RunClassification(InputFaces);
+		FIRST_RUN_FLAG = false;
+	}
 	else
 	{
 		EyeVectors[currentEye].DoLook();
@@ -586,7 +679,7 @@ Display( )
 		}
 		glEnd();
 
-		/*
+		
 		GLuint pbo = 0;
 		int w = glutGet(GLUT_WINDOW_WIDTH);
 		int h = glutGet(GLUT_WINDOW_HEIGHT);
@@ -598,7 +691,7 @@ Display( )
 		GLfloat* ptr = (GLfloat*)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
 		if (ptr)
 		{
-			char file_name[30] = "buffer_out_load_", f_id[3];
+			char file_name[30] = "buffer_out_multi_", f_id[3];
 			itoa(currentEye, f_id, 10);
 			strcat(file_name, f_id);
 			strcat(file_name, ".txt");
@@ -619,9 +712,9 @@ Display( )
 		}
 		glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
 		glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-		*/
+		
 	}
-	FIRST_RUN_FLAG = false;
+	
 
 	/*
 	GLuint pbo = 0;
