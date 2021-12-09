@@ -10,7 +10,7 @@
 #pragma warning(disable:4996)
 #endif
 
-#define OBJ_PATH "Cabinet.obj"
+#define OBJ_PATH "Frijegx.obj"
 #define MIN_VIEW_CNT 1
 
 #include "glew.h"
@@ -22,6 +22,8 @@
 
 #include "glm/vec3.hpp"
 
+#define NUMVIEWPORTSPERAXIS 3
+#define NUMTOTALVIEWPORTS 9
 //	This is a sample OpenGL / GLUT program
 //
 //	The objective is to draw a 3d object and change the color of the axes
@@ -56,7 +58,7 @@ const int ESCAPE = { 0x1b };
 
 // initial window size:
 
-const int INIT_WINDOW_SIZE = { 256 };
+const int INIT_WINDOW_SIZE = { 200 };
 
 // size of the 3d box:
 
@@ -225,6 +227,8 @@ void			Cross(float[3], float[3], float[3]);
 float			Dot(float [3], float [3]);
 float			Unit(float [3], float [3]);
 
+std::vector <Poly> InputFaces;
+
 char* ObjPath;
 
 struct Eye
@@ -247,35 +251,62 @@ float GetCenter(float max, float min)
 void 
 GenerateEyeVectors()
 {
-	Eye eyeNegX, eyePosX, eyeNegY, eyePosY, eyeNegZ, eyePosZ;
-	float eyeXDistance, eyeYDistance, eyeZDistance;
+	for (int i = 0; i < NUMVIEWPORTSPERAXIS; i++)
+	{
+		float centerX = GetCenter(MaxX, MinX);
+		float centerY = GetCenter(MaxY, MinY);
+		float centerZ = GetCenter(MaxZ, MinZ);
 
-	// Get centers to generate LOOKAT direction 
-	float centerX = GetCenter(MaxX, MinX);
-	float centerY = GetCenter(MaxY, MinY);
-	float centerZ = GetCenter(MaxZ, MinZ);
+		float r = max(abs(MinX - MaxX), abs(MinZ - MaxZ));
+		float x = r * cos((i * 2. * 3.14159) / NUMVIEWPORTSPERAXIS);
+		float z = r* sin((i * 2. * 3.14159) / NUMVIEWPORTSPERAXIS);
 
-	// get distance modifier for eye position based on axis
-	eyeXDistance = max(abs(MinY - MaxY), abs(MinZ - MaxZ))/3;
-	eyeYDistance = max(abs(MinX - MaxX), abs(MinZ - MaxZ))/3;
-	eyeZDistance = max(abs(MinX - MaxX), abs(MinY - MaxY))/3;
+		Eye eyeXY, eyeXZ, eyeYZ;
 
-	// yep they all have the same look at . Look at the center of the model
-	eyeNegX.LookAt = eyePosX.LookAt = eyeNegY.LookAt = eyePosY.LookAt = eyeNegZ.LookAt = eyePosZ.LookAt = glm::vec3(centerX, centerY, centerZ);
+		eyeXZ.Position = glm::vec3(x, centerY, z);
+		eyeXZ.LookAt = glm::vec3(centerX, centerY, centerZ);
 
-	eyeNegX.Position = glm::vec3(MinX - eyeXDistance, 0, 0);
-	eyePosX.Position = glm::vec3(MaxX + eyeXDistance, 0, 0);
-	eyeNegY.Position = glm::vec3(0, MinY - eyeYDistance, 0);
-	eyePosY.Position = glm::vec3(0, MaxY + eyeYDistance, 0);
-	eyeNegZ.Position = glm::vec3(0, 0, MinZ - eyeZDistance);
-	eyePosZ.Position = glm::vec3(0, 0, MaxZ + eyeZDistance);
+		eyeXY.Position = glm::vec3(x, z, centerZ);
+		eyeXY.LookAt = glm::vec3(centerX, centerY, centerZ);
 
-	EyeVectors.push_back(eyeNegX);
-	EyeVectors.push_back(eyePosX);
-	EyeVectors.push_back(eyeNegY);
-	EyeVectors.push_back(eyePosY);
-	EyeVectors.push_back(eyeNegZ);
-	EyeVectors.push_back(eyePosZ);
+		eyeYZ.Position = glm::vec3(centerX, x, z);
+		eyeYZ.LookAt = glm::vec3(centerX, centerY, centerZ);
+
+		EyeVectors.push_back(eyeXZ);
+		EyeVectors.push_back(eyeXY);
+		EyeVectors.push_back(eyeYZ);
+	}
+
+
+	//Eye eyeNegX, eyePosX, eyeNegY, eyePosY, eyeNegZ, eyePosZ;
+	//float eyeXDistance, eyeYDistance, eyeZDistance;
+
+	//// Get centers to generate LOOKAT direction 
+	//float centerX = GetCenter(MaxX, MinX);
+	//float centerY = GetCenter(MaxY, MinY);
+	//float centerZ = GetCenter(MaxZ, MinZ);
+
+	//// get distance modifier for eye position based on axis
+	//eyeXDistance = max(abs(MinY - MaxY), abs(MinZ - MaxZ))/2.;
+	//eyeYDistance = max(abs(MinX - MaxX), abs(MinZ - MaxZ))/2.;
+	//eyeZDistance = max(abs(MinX - MaxX), abs(MinY - MaxY))/2.;
+
+	//// yep they all have the same look at . Look at the center of the model
+	//eyeNegX.LookAt = eyePosX.LookAt = eyeNegY.LookAt = eyePosY.LookAt = eyeNegZ.LookAt = eyePosZ.LookAt = glm::vec3(centerX, centerY, centerZ);
+
+	//eyeNegX.Position = glm::vec3(MinX - eyeXDistance, 0, 0);
+	//eyePosX.Position = glm::vec3(MaxX + eyeXDistance, 0, 0);
+	//eyeNegY.Position = glm::vec3(0, MinY - eyeYDistance, 0);
+	//eyePosY.Position = glm::vec3(0, MaxY + eyeYDistance, 0);
+	//eyeNegZ.Position = glm::vec3(0, 0, MinZ - eyeZDistance);
+	//eyePosZ.Position = glm::vec3(0, 0, MaxZ + eyeZDistance);
+
+	//EyeVectors.push_back(eyeNegX);
+	//EyeVectors.push_back(eyePosX);
+	//EyeVectors.push_back(eyeNegY);
+	//EyeVectors.push_back(eyePosY);
+	//EyeVectors.push_back(eyeNegZ);
+	//EyeVectors.push_back(eyePosZ);
 }
 
 
@@ -334,14 +365,12 @@ GetCurrentDepthBuffer(bool set_depth_buffer)
 	glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
 	//
 	//return true;
+
 	if (ptr)
-	{
 		return true;
-	}
 	else
-	{
 		return false;
-	}
+	
 	//return ptr;
 }
 void
@@ -452,13 +481,13 @@ InitBuffer()
 #endif
 }
 void
-RunClassification(std::vector<Poly> Faces)
+RunClassification()
 {
 
 	int W = glutGet(GLUT_WINDOW_WIDTH);
 	int H = glutGet(GLUT_WINDOW_HEIGHT);
 	
-	for (int eye = 0; eye < 6; eye++)
+	for (int eye = 0; eye < NUMTOTALVIEWPORTS; eye++)
 	{
 		InitBuffer();
 
@@ -466,8 +495,10 @@ RunClassification(std::vector<Poly> Faces)
 		EyeVectors[eye].DoLook();
 
 		glBegin(GL_TRIANGLES);
-		printf("[Number of Faces]: %d\n", Faces.size());
-		for (Poly tmpPoly : Faces)
+		printf("[Number of Faces]: %d\n", InputFaces.size());
+
+		//glCallList(ObjList);
+		for (Poly tmpPoly : InputFaces)
 		{
 			int numVertices = tmpPoly.vList.size();
 			int numTriangles = numVertices - 2;
@@ -492,16 +523,20 @@ RunClassification(std::vector<Poly> Faces)
 
 		GetCurrentDepthBuffer(true);
 		//continue;
+
+		glFlush();
 		int total = 0, cc=0;
 		
-		for (int face_id = 0; face_id < Faces.size(); face_id++)
+		for (int face_id = 0; face_id < InputFaces.size(); face_id++)
 		{
 
-			Poly tmpPoly = Faces[face_id];
+			Poly tmpPoly = InputFaces[face_id];
 			int numVertices = tmpPoly.vList.size();
 			int numTriangles = numVertices - 2;
 			InitBuffer();
 			EyeVectors[eye].DoLook();
+
+			//glCallList(ObjList);
 			glBegin(GL_TRIANGLES);
 			for (int it = 0; it < numTriangles; it++)
 			{
@@ -522,8 +557,7 @@ RunClassification(std::vector<Poly> Faces)
 			
 			if (GetCurrentDepthBuffer(false) && buffer_cmp(W, H))
 			{
-				Poly* poly = &Faces[face_id];
-				poly->cnt += 1;
+				InputFaces[face_id].cnt += 1;
 				total += 1;
 			}
 
@@ -534,16 +568,15 @@ RunClassification(std::vector<Poly> Faces)
 		printf("[Total cnt]: %d\n", total);
 	}
 
-	for (int i = 0; i < Faces.size(); i++)
+	for (int i = 0; i < InputFaces.size(); i++)
 	{
-		Poly* poly = &Faces[i];
-		poly->visible = poly->cnt > 0;
+
+		InputFaces[i].visible = ((float)InputFaces[i].cnt/(float)NUMTOTALVIEWPORTS) > .25;
 	}
 }
 
 // main program:
 
-std::vector <Poly> InputFaces;
 
 int
 main( int argc, char *argv[ ] )
@@ -637,7 +670,7 @@ Display( )
 
 	if (FIRST_RUN_FLAG)
 	{
-		RunClassification(InputFaces);
+		RunClassification();
 		FIRST_RUN_FLAG = false;
 	}
 	else
@@ -667,12 +700,12 @@ Display( )
 
 					if (tmpPoly.visible)
 					{
-						glColor4f(1, 0, 0, .5);
+						glColor4f(.6, 0, 1, (tmpPoly.cnt / 25.));
 
 					}
 					else
 					{
-						glColor4f(0, 1, 0,.5);
+						glColor4f(1, 0, 0, (tmpPoly.cnt)/10.);
 					}
 					glVertex3f(tmpV.x, tmpV.y, tmpV.z);
 					//printf("(%.2lf, %.2lf, %.2lf)", tmpV.x, tmpV.y, tmpV.z);
@@ -683,40 +716,40 @@ Display( )
 		}
 		glEnd();
 
-		/*
-		GLuint pbo = 0;
-		int w = glutGet(GLUT_WINDOW_WIDTH);
-		int h = glutGet(GLUT_WINDOW_HEIGHT);
-		printf("(W, H): %d, %d\n", w, h);
-		glGenBuffers(1, &pbo);
-		glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
-		glBufferData(GL_PIXEL_PACK_BUFFER, w * h * sizeof(GLfloat), 0, GL_STREAM_READ);
-		glReadPixels(0, 0, w, h, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-		GLfloat* ptr = (GLfloat*)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
-		if (ptr)
-		{
-			char file_name[30] = "buffer_out_multi_", f_id[3];
-			itoa(currentEye, f_id, 10);
-			strcat(file_name, f_id);
-			strcat(file_name, ".txt");
-			printf(file_name);
+		//
+		//GLuint pbo = 0;
+		//int w = glutGet(GLUT_WINDOW_WIDTH);
+		//int h = glutGet(GLUT_WINDOW_HEIGHT);
+		//printf("(W, H): %d, %d\n", w, h);
+		//glGenBuffers(1, &pbo);
+		//glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
+		//glBufferData(GL_PIXEL_PACK_BUFFER, w * h * sizeof(GLfloat), 0, GL_STREAM_READ);
+		//glReadPixels(0, 0, w, h, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+		//GLfloat* ptr = (GLfloat*)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
+		//if (ptr)
+		//{
+		//	char file_name[30] = "buffer_out_multi_", f_id[3];
+		//	itoa(currentEye, f_id, 10);
+		//	strcat(file_name, f_id);
+		//	strcat(file_name, ".txt");
+		//	printf(file_name);
 
-			FILE* tfp = fopen(file_name, "w+");
-			fprintf(tfp, "\n");
-			for (int i = 0; i < w; i++)
-			{
-				for (int j = 0; j < h; j++)
-					if (*(ptr + i * h + j) < 1 - 1e-6)
-						fprintf(tfp, "(%d, %d): %.4lf\n", i, j, *(ptr + i * h + j));
-				//fprintf(tfp, "%.2lf ", *(ptr + i*h + j));
-		//fprintf(tfp, "\n");
-			}
-			fprintf(tfp, "\n");
-			fclose(tfp);
-		}
-		glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
-		glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-		*/
+		//	FILE* tfp = fopen(file_name, "w+");
+		//	fprintf(tfp, "\n");
+		//	for (int i = 0; i < w; i++)
+		//	{
+		//		for (int j = 0; j < h; j++)
+		//			if (*(ptr + i * h + j) < 1 - 1e-6)
+		//				fprintf(tfp, "(%d, %d): %.4lf\n", i, j, *(ptr + i * h + j));
+		//		//fprintf(tfp, "%.2lf ", *(ptr + i*h + j));
+		////fprintf(tfp, "\n");
+		//	}
+		//	fprintf(tfp, "\n");
+		//	fclose(tfp);
+		//}
+		//glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+		//glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+		//
 	}
 	
 
@@ -1089,6 +1122,15 @@ Keyboard( unsigned char c, int x, int y )
 
 	switch( c )
 	{
+		case 'n':
+		case 'N':
+			currentEye++;
+			if (currentEye == NUMTOTALVIEWPORTS)
+			{
+				currentEye = 0;
+			}
+			break;
+
 		case 'o':
 		case 'O':
 			WhichProjection = ORTHO;
