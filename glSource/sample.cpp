@@ -10,7 +10,7 @@
 #pragma warning(disable:4996)
 #endif
 
-#define OBJ_PATH "Frijegx.obj"
+#define OBJ_PATH "Cabinet.obj"
 #define MIN_VIEW_CNT 1
 
 #include "glew.h"
@@ -22,8 +22,6 @@
 
 #include "glm/vec3.hpp"
 
-#define NUMVIEWPORTSPERAXIS 3
-#define NUMTOTALVIEWPORTS 9
 //	This is a sample OpenGL / GLUT program
 //
 //	The objective is to draw a 3d object and change the color of the axes
@@ -251,62 +249,35 @@ float GetCenter(float max, float min)
 void 
 GenerateEyeVectors()
 {
-	for (int i = 0; i < NUMVIEWPORTSPERAXIS; i++)
-	{
-		float centerX = GetCenter(MaxX, MinX);
-		float centerY = GetCenter(MaxY, MinY);
-		float centerZ = GetCenter(MaxZ, MinZ);
+	Eye eyeNegX, eyePosX, eyeNegY, eyePosY, eyeNegZ, eyePosZ;
+	float eyeXDistance, eyeYDistance, eyeZDistance;
 
-		float r = max(abs(MinX - MaxX), abs(MinZ - MaxZ));
-		float x = r * cos((i * 2. * 3.14159) / NUMVIEWPORTSPERAXIS);
-		float z = r* sin((i * 2. * 3.14159) / NUMVIEWPORTSPERAXIS);
+	// Get centers to generate LOOKAT direction 
+	float centerX = GetCenter(MaxX, MinX);
+	float centerY = GetCenter(MaxY, MinY);
+	float centerZ = GetCenter(MaxZ, MinZ);
 
-		Eye eyeXY, eyeXZ, eyeYZ;
+	// get distance modifier for eye position based on axis
+	eyeXDistance = max(abs(MinY - MaxY), abs(MinZ - MaxZ))/2.;
+	eyeYDistance = max(abs(MinX - MaxX), abs(MinZ - MaxZ))/2.;
+	eyeZDistance = max(abs(MinX - MaxX), abs(MinY - MaxY))/2.;
 
-		eyeXZ.Position = glm::vec3(x, centerY, z);
-		eyeXZ.LookAt = glm::vec3(centerX, centerY, centerZ);
+	// yep they all have the same look at . Look at the center of the model
+	eyeNegX.LookAt = eyePosX.LookAt = eyeNegY.LookAt = eyePosY.LookAt = eyeNegZ.LookAt = eyePosZ.LookAt = glm::vec3(centerX, centerY, centerZ);
 
-		eyeXY.Position = glm::vec3(x, z, centerZ);
-		eyeXY.LookAt = glm::vec3(centerX, centerY, centerZ);
+	eyeNegX.Position = glm::vec3(MinX - eyeXDistance, centerY, 0);
+	eyePosX.Position = glm::vec3(MaxX + eyeXDistance, centerY, 0);
+	eyeNegY.Position = glm::vec3(0, MinY - eyeYDistance, 0);
+	eyePosY.Position = glm::vec3(0, MaxY + eyeYDistance, 0);
+	eyeNegZ.Position = glm::vec3(0, centerY, MinZ - eyeZDistance);
+	eyePosZ.Position = glm::vec3(0, centerY, MaxZ + eyeZDistance);
 
-		eyeYZ.Position = glm::vec3(centerX, x, z);
-		eyeYZ.LookAt = glm::vec3(centerX, centerY, centerZ);
-
-		EyeVectors.push_back(eyeXZ);
-		EyeVectors.push_back(eyeXY);
-		EyeVectors.push_back(eyeYZ);
-	}
-
-
-	//Eye eyeNegX, eyePosX, eyeNegY, eyePosY, eyeNegZ, eyePosZ;
-	//float eyeXDistance, eyeYDistance, eyeZDistance;
-
-	//// Get centers to generate LOOKAT direction 
-	//float centerX = GetCenter(MaxX, MinX);
-	//float centerY = GetCenter(MaxY, MinY);
-	//float centerZ = GetCenter(MaxZ, MinZ);
-
-	//// get distance modifier for eye position based on axis
-	//eyeXDistance = max(abs(MinY - MaxY), abs(MinZ - MaxZ))/2.;
-	//eyeYDistance = max(abs(MinX - MaxX), abs(MinZ - MaxZ))/2.;
-	//eyeZDistance = max(abs(MinX - MaxX), abs(MinY - MaxY))/2.;
-
-	//// yep they all have the same look at . Look at the center of the model
-	//eyeNegX.LookAt = eyePosX.LookAt = eyeNegY.LookAt = eyePosY.LookAt = eyeNegZ.LookAt = eyePosZ.LookAt = glm::vec3(centerX, centerY, centerZ);
-
-	//eyeNegX.Position = glm::vec3(MinX - eyeXDistance, 0, 0);
-	//eyePosX.Position = glm::vec3(MaxX + eyeXDistance, 0, 0);
-	//eyeNegY.Position = glm::vec3(0, MinY - eyeYDistance, 0);
-	//eyePosY.Position = glm::vec3(0, MaxY + eyeYDistance, 0);
-	//eyeNegZ.Position = glm::vec3(0, 0, MinZ - eyeZDistance);
-	//eyePosZ.Position = glm::vec3(0, 0, MaxZ + eyeZDistance);
-
-	//EyeVectors.push_back(eyeNegX);
-	//EyeVectors.push_back(eyePosX);
-	//EyeVectors.push_back(eyeNegY);
-	//EyeVectors.push_back(eyePosY);
-	//EyeVectors.push_back(eyeNegZ);
-	//EyeVectors.push_back(eyePosZ);
+	EyeVectors.push_back(eyeNegX);
+	EyeVectors.push_back(eyePosX);
+	EyeVectors.push_back(eyeNegY);
+	EyeVectors.push_back(eyePosY);
+	EyeVectors.push_back(eyeNegZ);
+	EyeVectors.push_back(eyePosZ);
 }
 
 
@@ -487,7 +458,7 @@ RunClassification()
 	int W = glutGet(GLUT_WINDOW_WIDTH);
 	int H = glutGet(GLUT_WINDOW_HEIGHT);
 	
-	for (int eye = 0; eye < NUMTOTALVIEWPORTS; eye++)
+	for (int eye = 0; eye < EyeVectors.size(); eye++)
 	{
 		InitBuffer();
 
@@ -570,8 +541,8 @@ RunClassification()
 
 	for (int i = 0; i < InputFaces.size(); i++)
 	{
-
-		InputFaces[i].visible = ((float)InputFaces[i].cnt/(float)NUMTOTALVIEWPORTS) > .25;
+		InputFaces[i].visible = InputFaces[i].cnt > 1;
+		//InputFaces[i].visible = InputFaces[i].cnt / 6. > .2;
 	}
 }
 
@@ -700,12 +671,12 @@ Display( )
 
 					if (tmpPoly.visible)
 					{
-						glColor4f(.6, 0, 1, (tmpPoly.cnt / 25.));
+						glColor4f(.6, 0, 1, (tmpPoly.cnt / 60.));
 
 					}
 					else
 					{
-						glColor4f(1, 0, 0, (tmpPoly.cnt)/10.);
+						glColor4f(1, 0, 0, (tmpPoly.cnt)/4.);
 					}
 					glVertex3f(tmpV.x, tmpV.y, tmpV.z);
 					//printf("(%.2lf, %.2lf, %.2lf)", tmpV.x, tmpV.y, tmpV.z);
@@ -1125,7 +1096,7 @@ Keyboard( unsigned char c, int x, int y )
 		case 'n':
 		case 'N':
 			currentEye++;
-			if (currentEye == NUMTOTALVIEWPORTS)
+			if (currentEye == EyeVectors.size())
 			{
 				currentEye = 0;
 			}
