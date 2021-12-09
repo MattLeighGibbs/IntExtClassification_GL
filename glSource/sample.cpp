@@ -11,6 +11,7 @@
 #endif
 
 #define OBJ_PATH "Darunia.obj"
+#define MIN_VIEW_CNT 1
 
 #include "glew.h"
 #include <GL/gl.h>
@@ -55,7 +56,7 @@ const int ESCAPE = { 0x1b };
 
 // initial window size:
 
-const int INIT_WINDOW_SIZE = { 600 };
+const int INIT_WINDOW_SIZE = { 256 };
 
 // size of the 3d box:
 
@@ -255,9 +256,9 @@ GenerateEyeVectors()
 	float centerZ = GetCenter(MaxZ, MinZ);
 
 	// get distance modifier for eye position based on axis
-	eyeXDistance = max(abs(MinY - MaxY), abs(MinZ - MaxZ))/10;
-	eyeYDistance = max(abs(MinX - MaxX), abs(MinZ - MaxZ))/10;
-	eyeZDistance = max(abs(MinX - MaxX), abs(MinY - MaxY))/10;
+	eyeXDistance = max(abs(MinY - MaxY), abs(MinZ - MaxZ))/3;
+	eyeYDistance = max(abs(MinX - MaxX), abs(MinZ - MaxZ))/3;
+	eyeZDistance = max(abs(MinX - MaxX), abs(MinY - MaxY))/3;
 
 	// yep they all have the same look at . Look at the center of the model
 	eyeNegX.LookAt = eyePosX.LookAt = eyeNegY.LookAt = eyePosY.LookAt = eyeNegZ.LookAt = eyePosZ.LookAt = glm::vec3(centerX, centerY, centerZ);
@@ -278,8 +279,8 @@ GenerateEyeVectors()
 }
 
 
-GLfloat DepthBuffer[1024][1024];
-GLfloat FaceBuffer[1024][1024];
+GLfloat DepthBuffer[512][512];
+GLfloat FaceBuffer[512][512];
 
 
 void set_DepthBuffer(GLfloat* ptr, int W, int H)
@@ -302,7 +303,7 @@ void set_FaceBuffer(GLfloat* ptr, int W, int H)
 
 bool buffer_cmp(int W, int H)
 {
-	GLfloat eps = 1e-8;
+	GLfloat eps = 1e-4;
 	for (int i = 0; i < W; i++)
 	{
 		for (int j = 0; j < H; j++)
@@ -313,7 +314,7 @@ bool buffer_cmp(int W, int H)
 	return true;
 }
 
-void 
+bool 
 GetCurrentDepthBuffer(bool set_depth_buffer)
 {
 	GLuint pbo = 0;
@@ -325,37 +326,18 @@ GetCurrentDepthBuffer(bool set_depth_buffer)
 	glBufferData(GL_PIXEL_PACK_BUFFER, w * h * sizeof(GLfloat), 0, GL_STREAM_READ);
 	glReadPixels(0, 0, w, h, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 	GLfloat* ptr = (GLfloat*)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
-	
+	if (set_depth_buffer)
+		set_DepthBuffer(ptr, w, h);
+	else
+		set_FaceBuffer(ptr, w, h);
 
-	if (ptr)
-	{
-		if (set_depth_buffer)
-			set_DepthBuffer(ptr, w, h);
-		else
-			set_FaceBuffer(ptr, w, h);
-		
-		char file_name[30] = "buffer_out_", f_id[3];
-		itoa(currentEye, f_id, 10);
-		strcat(file_name, f_id);
-		strcat(file_name, ".txt");
-		printf(file_name);
-
-		FILE* tfp = fopen(file_name, "w+");
-		fprintf(tfp, "\n");
-		for (int i = 0; i < w; i++)
-		{
-			for (int j = 0; j < h; j++)
-				if (*(ptr + i * h + j) < 1 - 1e-6)
-					fprintf(tfp, "(%d, %d): %.4lf\n", i, j, *(ptr + i * h + j));
-			//fprintf(tfp, "%.2lf ", *(ptr + i*h + j));
-	//fprintf(tfp, "\n");
-		}
-		fprintf(tfp, "\n");
-		fclose(tfp);
-		
-	}
 	glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
-
+	//
+	//return true;
+	if (ptr)
+		return true;
+	else
+		return false;
 	//return ptr;
 }
 
@@ -455,6 +437,10 @@ InitBuffer()
 
 	// draw the current object:
 
+
+	glColor3f(0, 1, 0);
+	glScalef(.005, .005, .005);
+
 #ifdef DEMO_Z_FIGHTING
 	if (DepthFightingOn != 0)
 	{
@@ -508,19 +494,18 @@ RunClassification(std::vector<Poly> Faces)
 		glEnd();
 
 		GetCurrentDepthBuffer(true);
-		continue;
+		//continue;
 		int total = 0, cc=0;
 		
-		for (Poly tmpPoly : Faces)
+		for (int face_id = 0; face_id < Faces.size(); face_id++)
 		{
-			InitBuffer();
-			glBegin(GL_TRIANGLES);
+
+			Poly tmpPoly = Faces[face_id];
 			int numVertices = tmpPoly.vList.size();
 			int numTriangles = numVertices - 2;
-
-			if (numTriangles < 1)
-				continue;
-
+			InitBuffer();
+			EyeVectors[eye].DoLook();
+			glBegin(GL_TRIANGLES);
 			for (int it = 0; it < numTriangles; it++)
 			{
 				int v_id[3];
@@ -537,14 +522,16 @@ RunClassification(std::vector<Poly> Faces)
 
 			}
 			glEnd();
-
-			GetCurrentDepthBuffer(false);
-			if (buffer_cmp(W, H))
+			
+			if (GetCurrentDepthBuffer(false) && buffer_cmp(W, H))
 			{
 				tmpPoly.cnt += 1;
 				total += 1;
 			}
+
+			//break;
 		}
+
 		printf("[Total cnt]: %d\n", total);
 	}
 }
@@ -657,6 +644,7 @@ Display( )
 		printf("[Number of Faces]: %d\n", InputFaces.size());
 		for (int face_id = 0; face_id < InputFaces.size(); face_id ++)
 		{
+			
 			Poly tmpPoly = InputFaces[face_id];
 			int numVertices = tmpPoly.vList.size();
 			int numTriangles = numVertices - 2;
@@ -676,10 +664,11 @@ Display( )
 				}
 
 			}
+			//break;
 		}
 		glEnd();
 
-		
+		/*
 		GLuint pbo = 0;
 		int w = glutGet(GLUT_WINDOW_WIDTH);
 		int h = glutGet(GLUT_WINDOW_HEIGHT);
@@ -712,7 +701,7 @@ Display( )
 		}
 		glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
 		glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-		
+		*/
 	}
 	
 
