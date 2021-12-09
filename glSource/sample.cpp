@@ -574,7 +574,7 @@ Display( )
 				v_id[0] = 0;
 				v_id[1] = it + 1;
 				v_id[2] = it + 2;
-				for (int i = 0; i < 1; i++)
+				for (int i = 0; i < 3; i++)
 				{
 					struct Vertex tmpV = tmpPoly.vList[v_id[i]];
 					//glTexCoord2f(1, 1);

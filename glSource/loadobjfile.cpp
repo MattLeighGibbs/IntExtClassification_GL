@@ -381,7 +381,7 @@ GetFacesFromObjFile( char *name )
 		{
 			if (f1.v < Vertices.size())
 			{
-				Vertex v = Vertices[f1.v];
+				Vertex v = Vertices[f1.v - 1];
 				doMinMaxChecks(v);
 				tempPoly.vList.push_back(v);
 			}
