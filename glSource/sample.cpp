@@ -10,7 +10,7 @@
 #pragma warning(disable:4996)
 #endif
 
-#define OBJ_PATH "Cabinet.obj"
+#define OBJ_PATH "Frijegx.obj"
 #define MIN_VIEW_CNT 1
 
 #include "glew.h"
@@ -671,12 +671,12 @@ Display( )
 
 					if (tmpPoly.visible)
 					{
-						glColor4f(.6, 0, 1, (tmpPoly.cnt / 60.));
+						glColor4f(.6, 0, 1, .5);
 
 					}
 					else
 					{
-						glColor4f(1, 0, 0, (tmpPoly.cnt)/4.);
+						glColor4f(.7, 0, 0, .5);
 					}
 					glVertex3f(tmpV.x, tmpV.y, tmpV.z);
 					//printf("(%.2lf, %.2lf, %.2lf)", tmpV.x, tmpV.y, tmpV.z);
