@@ -10,7 +10,7 @@
 #pragma warning(disable:4996)
 #endif
 
-#define OBJ_PATH "Darunia.obj"
+#define OBJ_PATH "Cabinet.obj"
 #define MIN_VIEW_CNT 1
 
 #include "glew.h"
@@ -335,20 +335,21 @@ GetCurrentDepthBuffer(bool set_depth_buffer)
 	//
 	//return true;
 	if (ptr)
+	{
 		return true;
+	}
 	else
+	{
 		return false;
+	}
 	//return ptr;
 }
-
 void
 InitBuffer()
 {
 	// set which window we want to do the graphics into:
 
 	glutSetWindow(MainWindow);
-
-
 
 	// erase the background:
 
@@ -437,9 +438,8 @@ InitBuffer()
 
 	// draw the current object:
 
-
-	glColor3f(0, 1, 0);
-	glScalef(.005, .005, .005);
+	//glColor3f(0, 1, 0);
+	//glScalef(.005, .005, .005);
 
 #ifdef DEMO_Z_FIGHTING
 	if (DepthFightingOn != 0)
@@ -451,9 +451,6 @@ InitBuffer()
 }
 #endif
 }
-
-
-
 void
 RunClassification(std::vector<Poly> Faces)
 {
@@ -525,14 +522,22 @@ RunClassification(std::vector<Poly> Faces)
 			
 			if (GetCurrentDepthBuffer(false) && buffer_cmp(W, H))
 			{
-				tmpPoly.cnt += 1;
+				Poly* poly = &Faces[face_id];
+				poly->cnt += 1;
 				total += 1;
 			}
 
 			//break;
 		}
 
+
 		printf("[Total cnt]: %d\n", total);
+	}
+
+	for (int i = 0; i < Faces.size(); i++)
+	{
+		Poly* poly = &Faces[i];
+		poly->visible = poly->cnt > 0;
 	}
 }
 
@@ -544,7 +549,7 @@ int
 main( int argc, char *argv[ ] )
 {
 	currentEye = 0;
-	InputFaces = GetFacesFromObjFile("Darunia.obj");
+	InputFaces = GetFacesFromObjFile(OBJ_PATH);
 	GenerateEyeVectors();
 
 	// turn on the glut package:
@@ -659,6 +664,16 @@ Display( )
 				{
 					struct Vertex tmpV = tmpPoly.vList[v_id[i]];
 					//glTexCoord2f(1, 1);
+
+					if (tmpPoly.visible)
+					{
+						glColor4f(1, 0, 0, .5);
+
+					}
+					else
+					{
+						glColor4f(0, 1, 0,.5);
+					}
 					glVertex3f(tmpV.x, tmpV.y, tmpV.z);
 					//printf("(%.2lf, %.2lf, %.2lf)", tmpV.x, tmpV.y, tmpV.z);
 				}
@@ -736,6 +751,7 @@ Display( )
 	exit(0);
 	*/
 	// swap the double-buffered framebuffers:
+
 
 	glutSwapBuffers( );
 

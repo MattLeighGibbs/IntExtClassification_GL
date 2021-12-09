@@ -41,6 +41,7 @@ struct Poly
 {
 	std::vector<Vertex> vList{};
 	int cnt = 0;
+	bool visible{ false };
 };
 
 void	Cross( float [3], float [3], float [3] );
