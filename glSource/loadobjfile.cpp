@@ -331,6 +331,32 @@ LoadObjFile( char *name )
 	fprintf( stderr, "Obj file  span = (%8.3f,%8.3f,%8.3f)\n",
 		xmax-xmin, ymax-ymin, zmax-zmin );
 
+
+	GLuint pbo = 0;
+	int w = glutGet(GLUT_WINDOW_WIDTH);
+	int h = glutGet(GLUT_WINDOW_HEIGHT);
+	//printf("(W, H): %d, %d\n", w, h);
+	glGenBuffers(1, &pbo);
+	glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
+	glBufferData(GL_PIXEL_PACK_BUFFER, w* h * sizeof(GLfloat), 0, GL_STREAM_READ);
+	glReadPixels(0, 0, w, h, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	GLfloat* ptr = (GLfloat*)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
+
+	FILE* tfp = fopen("buffer_out.txt", "w+");
+	fprintf(tfp, "\n");
+	for (int i = 0; i < w; i++)
+	{
+		for (int j = 0; j < h; j++)
+			if (*(ptr + i * h + j) < 1 - 1e-6)
+				fprintf(tfp, "(%d, %d): %.4lf\n", i, j, *(ptr + i * h + j));
+		//fprintf(tfp, "%.2lf ", *(ptr + i*h + j));
+//fprintf(tfp, "\n");
+	}
+	fprintf(tfp, "\n");
+	fclose(tfp);
+
+	glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+
 	return 0;
 }
 
