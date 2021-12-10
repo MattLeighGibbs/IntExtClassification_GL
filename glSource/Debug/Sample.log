@@ -1,26 +1,23 @@
 ﻿  sample.cpp
-D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(52,33): warning C4305: 'initializing': truncation from 'int' to 'float'
-D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(170,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(173,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(176,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(194,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(197,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(200,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(213,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(217,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(221,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\Development\IntExtClassification_GL\glSource\loadobjfile.cpp(384,13): warning C4018: '<': signed/unsigned mismatch
-D:\Development\IntExtClassification_GL\glSource\sample.cpp(246,28): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
-D:\Development\IntExtClassification_GL\glSource\sample.cpp(261,56): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\Development\IntExtClassification_GL\glSource\sample.cpp(262,56): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\Development\IntExtClassification_GL\glSource\sample.cpp(263,56): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-D:\Development\IntExtClassification_GL\glSource\sample.cpp(308,20): warning C4305: 'initializing': truncation from 'double' to 'GLfloat'
-D:\Development\IntExtClassification_GL\glSource\sample.cpp(461,24): warning C4018: '<': signed/unsigned mismatch
-D:\Development\IntExtClassification_GL\glSource\sample.cpp(501,33): warning C4018: '<': signed/unsigned mismatch
-D:\Development\IntExtClassification_GL\glSource\sample.cpp(542,20): warning C4018: '<': signed/unsigned mismatch
-D:\Development\IntExtClassification_GL\glSource\sample.cpp(654,33): warning C4018: '<': signed/unsigned mismatch
-D:\Development\IntExtClassification_GL\glSource\sample.cpp(674,29): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-D:\Development\IntExtClassification_GL\glSource\sample.cpp(679,29): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-D:\Development\IntExtClassification_GL\glSource\sample.cpp(1126,10): warning C4018: '<': signed/unsigned mismatch
+C:\Softs\cygwin64\home\kunya\PJ\IntExtClassification_GL\glSource\loadobjfile.cpp(52,33): warning C4305: 'initializing': truncation from 'int' to 'float'
+C:\Softs\cygwin64\home\kunya\PJ\IntExtClassification_GL\glSource\loadobjfile.cpp(170,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Softs\cygwin64\home\kunya\PJ\IntExtClassification_GL\glSource\loadobjfile.cpp(173,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Softs\cygwin64\home\kunya\PJ\IntExtClassification_GL\glSource\loadobjfile.cpp(176,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Softs\cygwin64\home\kunya\PJ\IntExtClassification_GL\glSource\loadobjfile.cpp(194,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Softs\cygwin64\home\kunya\PJ\IntExtClassification_GL\glSource\loadobjfile.cpp(197,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Softs\cygwin64\home\kunya\PJ\IntExtClassification_GL\glSource\loadobjfile.cpp(200,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Softs\cygwin64\home\kunya\PJ\IntExtClassification_GL\glSource\loadobjfile.cpp(213,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Softs\cygwin64\home\kunya\PJ\IntExtClassification_GL\glSource\loadobjfile.cpp(217,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Softs\cygwin64\home\kunya\PJ\IntExtClassification_GL\glSource\loadobjfile.cpp(221,16): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Softs\cygwin64\home\kunya\PJ\IntExtClassification_GL\glSource\loadobjfile.cpp(384,13): warning C4018: '<': signed/unsigned mismatch
+C:\Softs\cygwin64\home\kunya\PJ\IntExtClassification_GL\glSource\sample.cpp(246,28): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+C:\Softs\cygwin64\home\kunya\PJ\IntExtClassification_GL\glSource\sample.cpp(325,20): warning C4305: 'initializing': truncation from 'double' to 'GLfloat'
+C:\Softs\cygwin64\home\kunya\PJ\IntExtClassification_GL\glSource\sample.cpp(497,24): warning C4018: '<': signed/unsigned mismatch
+C:\Softs\cygwin64\home\kunya\PJ\IntExtClassification_GL\glSource\sample.cpp(539,33): warning C4018: '<': signed/unsigned mismatch
+C:\Softs\cygwin64\home\kunya\PJ\IntExtClassification_GL\glSource\sample.cpp(580,20): warning C4018: '<': signed/unsigned mismatch
+C:\Softs\cygwin64\home\kunya\PJ\IntExtClassification_GL\glSource\sample.cpp(697,33): warning C4018: '<': signed/unsigned mismatch
+C:\Softs\cygwin64\home\kunya\PJ\IntExtClassification_GL\glSource\sample.cpp(717,29): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Softs\cygwin64\home\kunya\PJ\IntExtClassification_GL\glSource\sample.cpp(722,29): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+C:\Softs\cygwin64\home\kunya\PJ\IntExtClassification_GL\glSource\sample.cpp(1170,10): warning C4018: '<': signed/unsigned mismatch
 sample.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
-  Sample.vcxproj -> D:\Development\IntExtClassification_GL\glSource\Debug\Sample.exe
+  Sample.vcxproj -> C:\Softs\cygwin64\home\kunya\PJ\IntExtClassification_GL\glSource\Debug\Sample.exe

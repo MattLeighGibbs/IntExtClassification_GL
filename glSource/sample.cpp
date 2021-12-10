@@ -8,9 +8,9 @@
 #ifdef WIN32
 #include <windows.h>
 #pragma warning(disable:4996)
-#endif
+#endif 
 
-#define OBJ_PATH "Frijegx.obj"
+#define OBJ_PATH "Cabinet.obj"
 #define MIN_VIEW_CNT 1
 
 #include "glew.h"
@@ -56,7 +56,7 @@ const int ESCAPE = { 0x1b };
 
 // initial window size:
 
-const int INIT_WINDOW_SIZE = { 200 };
+const int INIT_WINDOW_SIZE = { 384 };
 
 // size of the 3d box:
 
@@ -258,9 +258,9 @@ GenerateEyeVectors()
 	float centerZ = GetCenter(MaxZ, MinZ);
 
 	// get distance modifier for eye position based on axis
-	eyeXDistance = max(abs(MinY - MaxY), abs(MinZ - MaxZ))/2.;
-	eyeYDistance = max(abs(MinX - MaxX), abs(MinZ - MaxZ))/2.;
-	eyeZDistance = max(abs(MinX - MaxX), abs(MinY - MaxY))/2.;
+	eyeXDistance = max(abs(MinY - MaxY), abs(MinZ - MaxZ))/2;
+	eyeYDistance = max(abs(MinX - MaxX), abs(MinZ - MaxZ))/2;
+	eyeZDistance = max(abs(MinX - MaxX), abs(MinY - MaxY))/2;
 
 	// yep they all have the same look at . Look at the center of the model
 	eyeNegX.LookAt = eyePosX.LookAt = eyeNegY.LookAt = eyePosY.LookAt = eyeNegZ.LookAt = eyePosZ.LookAt = glm::vec3(centerX, centerY, centerZ);
@@ -284,7 +284,7 @@ GenerateEyeVectors()
 GLfloat DepthBuffer[512][512];
 GLfloat FaceBuffer[512][512];
 
-
+/*
 void set_DepthBuffer(GLfloat* ptr, int W, int H)
 {
 
@@ -305,7 +305,7 @@ void set_FaceBuffer(GLfloat* ptr, int W, int H)
 
 bool buffer_cmp(int W, int H)
 {
-	GLfloat eps = 1e-4;
+	GLfloat eps = 1e-8;
 	for (int i = 0; i < W; i++)
 	{
 		for (int j = 0; j < H; j++)
@@ -315,32 +315,66 @@ bool buffer_cmp(int W, int H)
 	}
 	return true;
 }
+*/
+
+GLuint DB_all = 0, DB_indv = 0;
+GLfloat *DB_all_ptr = NULL, *DB_indv_ptr = NULL;
+
+bool buffer_cmp(int W, int H)
+{
+	GLfloat eps = 1e-6;
+	GLfloat match_cnt = 0, total = 0;
+	for (int i = 0; i < W; i++)
+	{
+		for (int j = 0; j < H; j++)
+			if (abs(*(DB_indv_ptr + i * H + j) - 1) > eps)
+			{
+				total++;
+				if (abs(*(DB_all_ptr + i * H + j) - *(DB_indv_ptr + i * H + j)) < eps)
+				{
+					match_cnt++;
+					//if (cnt <= 0)
+					//	return true;
+				}
+			}
+	}
+	if (match_cnt / total > 0.9)
+		return true;
+	return false;
+}
 
 bool 
-GetCurrentDepthBuffer(bool set_depth_buffer)
+GetCurrentDepthBuffer(bool set_DB_all)
 {
-	GLuint pbo = 0;
 	int w = glutGet(GLUT_WINDOW_WIDTH);
 	int h = glutGet(GLUT_WINDOW_HEIGHT);
 	//printf("(W, H): %d, %d\n", w, h);
-	glGenBuffers(1, &pbo);
-	glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
+	if (set_DB_all)
+		glBindBuffer(GL_PIXEL_PACK_BUFFER, DB_all);
+	else
+		glBindBuffer(GL_PIXEL_PACK_BUFFER, DB_indv);
+
 	glBufferData(GL_PIXEL_PACK_BUFFER, w * h * sizeof(GLfloat), 0, GL_STREAM_READ);
 	glReadPixels(0, 0, w, h, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-	GLfloat* ptr = (GLfloat*)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
-	if (set_depth_buffer)
-		set_DepthBuffer(ptr, w, h);
+
+	if (set_DB_all)
+		DB_all_ptr = (GLfloat*)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
 	else
-		set_FaceBuffer(ptr, w, h);
+		DB_indv_ptr = (GLfloat*)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
+	
+	//	set_DepthBuffer(ptr, w, h);
+	
+	//	set_FaceBuffer(ptr, w, h);
 
 	glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
 	//
-	//return true;
 
-	if (ptr)
-		return true;
-	else
-		return false;
+	return true;
+
+	//if (ptr)
+	//	return true;
+	//else
+	//	return false;
 	
 	//return ptr;
 }
@@ -350,6 +384,7 @@ InitBuffer()
 	// set which window we want to do the graphics into:
 
 	glutSetWindow(MainWindow);
+	
 
 	// erase the background:
 
@@ -394,7 +429,6 @@ InitBuffer()
 
 	// set the eye position, look-at position, and up-vector:
 
-	//EyeVectors[currentEye].DoLook();
 
 	// rotate the scene:
 
@@ -450,6 +484,8 @@ InitBuffer()
 		glPopMatrix();
 }
 #endif
+
+
 }
 void
 RunClassification()
@@ -462,8 +498,10 @@ RunClassification()
 	{
 		InitBuffer();
 
-		currentEye = eye;
 		EyeVectors[eye].DoLook();
+
+		//currentEye = eye;
+		//EyeVectors[eye].DoLook();
 
 		glBegin(GL_TRIANGLES);
 		printf("[Number of Faces]: %d\n", InputFaces.size());
@@ -541,7 +579,7 @@ RunClassification()
 
 	for (int i = 0; i < InputFaces.size(); i++)
 	{
-		InputFaces[i].visible = InputFaces[i].cnt > 1;
+		InputFaces[i].visible = InputFaces[i].cnt >= 1;
 		//InputFaces[i].visible = InputFaces[i].cnt / 6. > .2;
 	}
 }
@@ -632,7 +670,6 @@ Display( )
 		fprintf( stderr, "Display\n" );
 	}
 
-	InitBuffer();
 
 	//EyeVectors[2].DoLook();
 	//glCallList(ObjList);
@@ -641,16 +678,22 @@ Display( )
 
 	if (FIRST_RUN_FLAG)
 	{
+
+		glGenBuffers(1, &DB_all);
+		glGenBuffers(1, &DB_indv);
 		RunClassification();
 		FIRST_RUN_FLAG = false;
 	}
 	else
 	{
+
+		InitBuffer();
 		EyeVectors[currentEye].DoLook();
 		//glCallList(ObjList);
 
+
 		glBegin(GL_TRIANGLES);
-		printf("[Number of Faces]: %d\n", InputFaces.size());
+		//printf("[Number of Faces]: %d\n", InputFaces.size());
 		for (int face_id = 0; face_id < InputFaces.size(); face_id ++)
 		{
 			
@@ -671,12 +714,12 @@ Display( )
 
 					if (tmpPoly.visible)
 					{
-						glColor4f(.6, 0, 1, .5);
+						glColor4f(.4, 0, 1, .4);
 
 					}
 					else
 					{
-						glColor4f(.7, 0, 0, .5);
+						glColor4f(.5, 0, 0, .8);
 					}
 					glVertex3f(tmpV.x, tmpV.y, tmpV.z);
 					//printf("(%.2lf, %.2lf, %.2lf)", tmpV.x, tmpV.y, tmpV.z);
@@ -1100,6 +1143,7 @@ Keyboard( unsigned char c, int x, int y )
 			{
 				currentEye = 0;
 			}
+			//EyeVectors[currentEye].DoLook();
 			break;
 
 		case 'o':
